@@ -7,6 +7,21 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testARTK+", "testARTK+\test
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ARTKmulti", "ARTKmulti\ARTKmulti.vcxproj", "{5D50C39D-D9D5-45BC-9A1D-DC5449A933AA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testArUco", "testArUco\testArUco.vcxproj", "{1A45E651-CAA7-4B92-B3C5-4BB32B646B05}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C25214EE-2593-400A-A53C-7A97D9DF8EEA}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simpleGLFW", "simpleGLFW\simpleGLFW.vcxproj", "{55D0E8D9-0D15-4BD3-A488-3B45662B42A9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testARTK5", "testARTK5\testARTK5.vcxproj", "{33B5F57B-8C4F-46BF-97AB-AA97C25DCF3C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "calib_camera2_forKinect", "calib_camera2\calib_camera2.vcxproj", "{7218026D-600A-2D4D-C387-44E5B226FA6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +36,22 @@ Global
 		{5D50C39D-D9D5-45BC-9A1D-DC5449A933AA}.Debug|Win32.Build.0 = Debug|Win32
 		{5D50C39D-D9D5-45BC-9A1D-DC5449A933AA}.Release|Win32.ActiveCfg = Release|Win32
 		{5D50C39D-D9D5-45BC-9A1D-DC5449A933AA}.Release|Win32.Build.0 = Release|Win32
+		{1A45E651-CAA7-4B92-B3C5-4BB32B646B05}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1A45E651-CAA7-4B92-B3C5-4BB32B646B05}.Debug|Win32.Build.0 = Debug|Win32
+		{1A45E651-CAA7-4B92-B3C5-4BB32B646B05}.Release|Win32.ActiveCfg = Release|Win32
+		{1A45E651-CAA7-4B92-B3C5-4BB32B646B05}.Release|Win32.Build.0 = Release|Win32
+		{55D0E8D9-0D15-4BD3-A488-3B45662B42A9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{55D0E8D9-0D15-4BD3-A488-3B45662B42A9}.Debug|Win32.Build.0 = Debug|Win32
+		{55D0E8D9-0D15-4BD3-A488-3B45662B42A9}.Release|Win32.ActiveCfg = Release|Win32
+		{55D0E8D9-0D15-4BD3-A488-3B45662B42A9}.Release|Win32.Build.0 = Release|Win32
+		{33B5F57B-8C4F-46BF-97AB-AA97C25DCF3C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{33B5F57B-8C4F-46BF-97AB-AA97C25DCF3C}.Debug|Win32.Build.0 = Debug|Win32
+		{33B5F57B-8C4F-46BF-97AB-AA97C25DCF3C}.Release|Win32.ActiveCfg = Release|Win32
+		{33B5F57B-8C4F-46BF-97AB-AA97C25DCF3C}.Release|Win32.Build.0 = Release|Win32
+		{7218026D-600A-2D4D-C387-44E5B226FA6A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7218026D-600A-2D4D-C387-44E5B226FA6A}.Debug|Win32.Build.0 = Debug|Win32
+		{7218026D-600A-2D4D-C387-44E5B226FA6A}.Release|Win32.ActiveCfg = Release|Win32
+		{7218026D-600A-2D4D-C387-44E5B226FA6A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
