@@ -101,6 +101,10 @@ void display()
 	int thresh = (int)threshold(binary, binary, 100, 255, THRESH_BINARY | THRESH_OTSU);
 	ARMarkerInfo *marker_info;
 	int marker_num;				//	発見したマーカー候補の数
+
+	double f = 1000.0 / cv::getTickFrequency();
+	int64 time = cv::getTickCount();
+
 	if (arDetectMarker(imgData, thresh, &marker_info, &marker_num) < 0)
 	{
 		exit(-1);
@@ -131,7 +135,7 @@ void display()
 
 		drawObject(marker[i].patt_id, marker[i].patt_trans);
 	}
-
+	std::cout << ", time = " << getTickFrequency()/(getTickCount() - time) << " [fps]\r";
 	glutSwapBuffers();
 }
 void idleEvent()
