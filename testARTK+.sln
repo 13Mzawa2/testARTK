@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "calib_camera2_forKinect", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ARTKPlusMulti", "ARTKPlusMulti\ARTKPlusMulti.vcxproj", "{CC2002A0-893E-4EF9-9C88-844B31FF052D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ARTKMultiCube", "ARTKMultiCube\ARTKMultiCube.vcxproj", "{9EFBC3F0-E739-4219-BE9B-F32968D69E7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -58,6 +60,10 @@ Global
 		{CC2002A0-893E-4EF9-9C88-844B31FF052D}.Debug|Win32.Build.0 = Debug|Win32
 		{CC2002A0-893E-4EF9-9C88-844B31FF052D}.Release|Win32.ActiveCfg = Release|Win32
 		{CC2002A0-893E-4EF9-9C88-844B31FF052D}.Release|Win32.Build.0 = Release|Win32
+		{9EFBC3F0-E739-4219-BE9B-F32968D69E7E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9EFBC3F0-E739-4219-BE9B-F32968D69E7E}.Debug|Win32.Build.0 = Debug|Win32
+		{9EFBC3F0-E739-4219-BE9B-F32968D69E7E}.Release|Win32.ActiveCfg = Release|Win32
+		{9EFBC3F0-E739-4219-BE9B-F32968D69E7E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

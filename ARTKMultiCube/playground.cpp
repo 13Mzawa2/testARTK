@@ -19,13 +19,19 @@
 //	Library Linker Scripts
 #include "OpenCV3Linker.h"
 #include "OpenGLHeader.h"
-#include <ARToolKitPlus\TrackerSingleMarkerImpl.h>
-#include <ARToolKitPlus\TrackerMultiMarkerImpl.h>
-#pragma comment(lib, "ARToolKitPlus.lib")
+#include <AR/ar.h>
+#include <AR/arMulti.h>
+#ifdef _DEBUG
+#define AR_EXT "d.lib"
+#else
+#define AR_EXT ".lib"
+#endif
+#pragma comment(lib, "AR" AR_EXT)
+#pragma comment(lib, "ARICP" AR_EXT)
+#pragma comment(lib, "ARMulti" AR_EXT)
 //	Original Libraries
 #include "OBJRenderingEngine.h"		//	my simple rendering engine
 #include "GLImage.h"		//	Draw OpenCV images in GLFW window
-#include "OpenCVCamera.h"	//	OpenCV cameraMatrix -> ARToolKitPlus::Camera
 
 using namespace cv;
 using namespace std;
@@ -44,17 +50,16 @@ const char textureDir[] = "./data/CalibBox/textures/txt_001_diff.bmp";
 const char calibDir[] = "./data/calibdata.xml";
 const char dummyCalibDir[] = "./data/LogitechPro4000.dat";
 //	MultiMarker Setting File
-const char markerDir[] = "./data/cubemarker_0-4.cfg";
+const char markerConfigDir[] = "./data/CubeMarker/cubemarker_artk5.dat";
 
 //===========================================
-//	for ARToolKitPlus Variables
+//	for ARToolKit Variables
 //===========================================
-#define MARKER_SIZE 48.0f
+#define MARKER_SIZE 40.0f
 //	for OpenCV camera calibration
 Mat cameraMatrix, distCoeffs;
 Size cameraSize;
 Mat mapC1, mapC2;
-ARToolKitPlus::TrackerMultiMarker *tracker;
 VideoCapture cap;
 Mat frameImg;
 
@@ -139,26 +144,38 @@ int main(void)
 	glImg.init(mainWindow);
 
 	//----------------------
-	//	Initialize ARToolKitPlus
-	//	 6, 6 - 6x6のパターンドットを使用
-	//	 12 - パターン解析時の最大解像度，パターンドットの縦と横の公倍数である必要がある
-	//	 8 - ARToolKitPlus内にロードするパターンファイルの最大数
-	//	 3 - カメラ内で認識対象とする最大個数
+	//	Initialize ARToolKit
 	//----------------------
-	ARToolKitPlus::Camera *param = OpenCVCamera::fromOpenCV(cameraMatrix, distCoeffs, cameraSize);
-	tracker = new ARToolKitPlus::TrackerMultiMarkerImpl<6, 6, 12, 1, 3>(cameraSize.width, cameraSize.height);
-	//tracker->init("data/LogitechPro4000.dat", 0.1f, 5000.0f);	
-	//tracker->changeCameraSize(cameraSize.width, cameraSize.height);
-	tracker->init(dummyCalibDir, markerDir, 0.1f, 5000.0f);	//	最初のキャリブレーションファイルはダミー
-	tracker->setCamera(param);
-	tracker->activateAutoThreshold(true);							//	2値化処理の自動閾値を有効化
-	tracker->setNumAutoThresholdRetries(3);							//	自動閾値のリトライ数
-	tracker->setMarkerMode(ARToolKitPlus::MARKER_ID_BCH);
-	tracker->setBorderWidth(0.125f);								//	BCH boader width = 12.5%
-	tracker->setPixelFormat(ARToolKitPlus::PIXEL_FORMAT_BGR);		//	With OpenCV
-	tracker->setUndistortionMode(ARToolKitPlus::UNDIST_NONE);		//	UndistortionはOpenCV側で行う
-	//tracker->setPoseEstimator(ARToolKitPlus::POSE_ESTIMATOR_RPP);
-
+	//	Set camera parameters and make ARToolKit handles
+	ARParam cparam;
+	arParamLoad(dummyCalibDir, 1, &cparam);
+	arParamChangeSize(&cparam, cameraSize.width, cameraSize.height, &cparam);
+	cparam.xsize = cameraSize.width;
+	cparam.ysize = cameraSize.height;
+	cparam.mat[0][0] = cameraMatrix.at<double>(0, 0);
+	cparam.mat[1][1] = cameraMatrix.at<double>(1, 1);
+	cparam.mat[0][2] = cameraMatrix.at<double>(0, 2);
+	cparam.mat[1][2] = cameraMatrix.at<double>(1, 2);
+	cparam.mat[2][2] = 1.0;
+	ARParamLT *cparamLT = arParamLTCreate(&cparam, AR_PARAM_LT_DEFAULT_OFFSET);
+	ARHandle *arhandle = arCreateHandle(cparamLT);
+	arSetPixelFormat(arhandle, AR_PIXEL_FORMAT_BGR);
+	arSetDebugMode(arhandle, AR_DEBUG_DISABLE);
+	AR3DHandle *ar3dhandle = ar3DCreateHandle(&cparam);
+	//	Setup Cube Marker
+	ARPattHandle *pattHandle = arPattCreateHandle();
+	ARMultiMarkerInfoT *multiConfig = arMultiReadConfigFile(markerConfigDir, pattHandle);
+	if (multiConfig->patt_type == AR_MULTI_PATTERN_DETECTION_MODE_TEMPLATE) {
+		arSetPatternDetectionMode(arhandle, AR_TEMPLATE_MATCHING_COLOR);
+	}
+	else if (multiConfig->patt_type == AR_MULTI_PATTERN_DETECTION_MODE_MATRIX) {
+		arSetPatternDetectionMode(arhandle, AR_MATRIX_CODE_DETECTION);
+	}
+	else { // AR_MULTI_PATTERN_DETECTION_MODE_TEMPLATE_AND_MATRIX
+		arSetPatternDetectionMode(arhandle, AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX);
+	}
+	arPattAttach(arhandle, pattHandle);
+	arSetBorderSize(arhandle, 0.125);
 
 	//	タイマー設定
 	double currentTime = 0.0, processTime = 0.0;
@@ -177,18 +194,44 @@ int main(void)
 		//	Start timer
 		currentTime = glfwGetTime();
 		//------------------------------
-		//	Detect Marker
+		//	Detect Cube Marker
 		//------------------------------
 		//	カメラからマーカーまで
 		static glm::mat4 markerTransMat = glm::mat4(1.0f);
-		ARToolKitPlus::ARMarkerInfo *markers;
-		int numDetected = tracker->calc(frameImg.data);
-		markerTransMat = glm::make_mat4(tracker->getModelViewMatrix());
-		int *markerIDs;
-		tracker->getDetectedMarkers(markerIDs); 
-		for (int i = 0; i < tracker->getNumDetectedMarkers(); i++)
+		static int patt_found = FALSE;
+		if(arDetectMarker(arhandle, (ARUint8*)frameImg.data)<0)break;
+		arGetTransMatMultiSquare(ar3dhandle, arGetMarker(arhandle), arGetMarkerNum(arhandle), multiConfig);
+		if (multiConfig->prevF != 0)
 		{
-			cout << markerIDs[i] << " ";
+			patt_found = TRUE;
+			double m_modelview[16];
+			double para[3][4];
+			for (int k = 0; k < 3; k++) {
+				for (int j = 0; j < 4; j++) {
+					para[k][j] = multiConfig->trans[k][j];
+				}
+			}
+			m_modelview[0 + 0 * 4] = para[0][0]; // R1C1
+			m_modelview[0 + 1 * 4] = para[0][1]; // R1C2
+			m_modelview[0 + 2 * 4] = para[0][2];
+			m_modelview[0 + 3 * 4] = para[0][3];
+			m_modelview[1 + 0 * 4] = para[1][0]; // R2
+			m_modelview[1 + 1 * 4] = para[1][1];
+			m_modelview[1 + 2 * 4] = para[1][2];
+			m_modelview[1 + 3 * 4] = para[1][3];
+			m_modelview[2 + 0 * 4] = para[2][0]; // R3
+			m_modelview[2 + 1 * 4] = para[2][1];
+			m_modelview[2 + 2 * 4] = para[2][2];
+			m_modelview[2 + 3 * 4] = para[2][3];
+			m_modelview[3 + 0 * 4] = 0.0;
+			m_modelview[3 + 1 * 4] = 0.0;
+			m_modelview[3 + 2 * 4] = 0.0;
+			m_modelview[3 + 3 * 4] = 1.0;
+			markerTransMat = glm::make_mat4(m_modelview);
+		}
+		else
+		{
+			patt_found = FALSE;
 		}
 		//	End of timer
 		//-------------------------------
@@ -242,9 +285,11 @@ int main(void)
 		if (glfwGetKey(mainWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS		//	Escキー
 			|| glfwWindowShouldClose(mainWindow))			//	ウィンドウの閉じるボタン
 		{
-			if (tracker)
-				delete tracker;
-			tracker = NULL;
+			arPattDetach(arhandle);
+			arPattDeleteHandle(pattHandle);
+			ar3DDeleteHandle(&ar3dhandle);
+			arDeleteHandle(arhandle);
+			arParamLTFree(&cparamLT);
 			glfwTerminate();
 			break;
 		}
