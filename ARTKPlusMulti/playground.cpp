@@ -146,18 +146,18 @@ int main(void)
 	//	 3 - カメラ内で認識対象とする最大個数
 	//----------------------
 	ARToolKitPlus::Camera *param = OpenCVCamera::fromOpenCV(cameraMatrix, distCoeffs, cameraSize);
-	tracker = new ARToolKitPlus::TrackerMultiMarkerImpl<6, 6, 12, 3, 3>(cameraSize.width, cameraSize.height);
+	tracker = new ARToolKitPlus::TrackerMultiMarkerImpl<6, 6, 12, 1, 3>(cameraSize.width, cameraSize.height);
 	//tracker->init("data/LogitechPro4000.dat", 0.1f, 5000.0f);	
 	//tracker->changeCameraSize(cameraSize.width, cameraSize.height);
 	tracker->init(dummyCalibDir, markerDir, 0.1f, 5000.0f);	//	最初のキャリブレーションファイルはダミー
 	tracker->setCamera(param);
-	tracker->activateAutoThreshold(true);			//	2値化処理の自動閾値を有効化
-	tracker->setNumAutoThresholdRetries(3);			//	自動閾値のリトライ数
-	tracker->setBorderWidth(0.125f);			//	BCH boader width = 12.5%
+	tracker->activateAutoThreshold(true);							//	2値化処理の自動閾値を有効化
+	tracker->setNumAutoThresholdRetries(3);							//	自動閾値のリトライ数
+	tracker->setMarkerMode(ARToolKitPlus::MARKER_ID_BCH);
+	tracker->setBorderWidth(0.125f);								//	BCH boader width = 12.5%
 	tracker->setPixelFormat(ARToolKitPlus::PIXEL_FORMAT_BGR);		//	With OpenCV
 	tracker->setUndistortionMode(ARToolKitPlus::UNDIST_NONE);		//	UndistortionはOpenCV側で行う
-	tracker->setMarkerMode(ARToolKitPlus::MARKER_ID_BCH);
-	tracker->setPoseEstimator(ARToolKitPlus::POSE_ESTIMATOR_ORIGINAL);
+	//tracker->setPoseEstimator(ARToolKitPlus::POSE_ESTIMATOR_RPP);
 
 
 	//	タイマー設定
@@ -184,6 +184,12 @@ int main(void)
 		ARToolKitPlus::ARMarkerInfo *markers;
 		int numDetected = tracker->calc(frameImg.data);
 		markerTransMat = glm::make_mat4(tracker->getModelViewMatrix());
+		int *markerIDs;
+		tracker->getDetectedMarkers(markerIDs); 
+		for (int i = 0; i < tracker->getNumDetectedMarkers(); i++)
+		{
+			cout << markerIDs[i] << " ";
+		}
 
 		//------------------------------
 		//	Draw Main Winodw
